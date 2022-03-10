@@ -4,12 +4,11 @@
 
 ### 2.install curl and something in need(like unzip)
 
-### 3.exec this code
+### 3.exec this code,please replace 192.168.1.0/24 to the lan cidr,enp4s0 to the wan ifname,enp3s0 to lan ifname
 
 ``` bash
 #!/bin/bash
 # please replace 1234 to the v2ray dokodemo port
-# and replace enp4s0 to the upstream interface(pppoe offten is ppp0
 mkdir /etc/nftables;
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' > /tmp/raw;
 echo "define chnroute_list = {" > /etc/nftables/chnroute.nft;
@@ -37,10 +36,18 @@ table inet filter
 delete table inet filter
 table inet filter {
        chain input {
-               type filter hook input priority 0;
+               type filter hook input priority 0;policy drop;
+               ct state established,related accept
+               iifname lo accept
+               iifname enp3s0 accept
+               icmp type echo-request accept
+               ip saddr 192.168.1.0/24 accept
+               tcp dport {ssh,https,http} accept
        }
        chain forward {
-               type filter hook forward priority 0;
+               type filter hook forward priority 0;policy drop;
+               iifname enp3s0 oifname enp4s0 accept
+               iifname enp4s0 oifname enp3s0 ct state {related,established} accept
        }
        chain output {
                type filter hook output priority 0;
@@ -65,7 +72,7 @@ chain prerouting {
     goto proxy
   }
 }
-'>cat /etc/nftables.conf
+'>/etc/nftables.conf
 systemctl restart nftables.service && systemctl enable nftables.service
 
 ```
