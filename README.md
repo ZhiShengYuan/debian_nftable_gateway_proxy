@@ -12,7 +12,7 @@ dhcp-option=option:router,192.168.1.1
 dhcp-option=option:dns-server,192.168.1.1
 dhcp-leasefile=/var/log/dhcp.leases
 ```
-also rember to replace it
+also remember to replace it
 ### 3.exec this code,please replace 192.168.1.0/24 to the lan cidr,enp4s0 to the wan ifname,enp3s0 to lan ifname,and custome the `tcp dport {ssh,https,http} accept` to the port you want allow wan to access
 
 ``` bash
