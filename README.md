@@ -9,6 +9,7 @@
 ``` bash
 #!/bin/bash
 # please replace 1234 to the v2ray dokodemo port
+# and replace enp4s0 to the upstream interface(pppoe offten is ppp0
 mkdir /etc/nftables;
 curl 'http://ftp.apnic.net/apnic/stats/apnic/delegated-apnic-latest' > /tmp/raw;
 echo "define chnroute_list = {" > /etc/nftables/chnroute.nft;
