@@ -2,8 +2,17 @@
 
 ### 1.install debian and nftables,uninstall iptables
 
-### 2.install curl and something in need(like unzip)
-
+### 2.install curl and something in need(like unzip),and config dnsmasq(as dhcp server and dns server),here is a refer configure file 
+```
+interface=enp3s0
+port=53
+server=223.5.5.5
+dhcp-range=192.168.1.100,192.168.1.250,1h
+dhcp-option=option:router,192.168.1.1
+dhcp-option=option:dns-server,192.168.1.1
+dhcp-leasefile=/var/log/dhcp.leases
+```
+also rember to replace it
 ### 3.exec this code,please replace 192.168.1.0/24 to the lan cidr,enp4s0 to the wan ifname,enp3s0 to lan ifname,and custome the `tcp dport {ssh,https,http} accept` to the port you want allow wan to access
 
 ``` bash
