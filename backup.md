@@ -1,3 +1,4 @@
+>``` text
 >#!/usr/sbin/nft -f
 >flush ruleset
 >include "/etc/iprules/bypass.nft"
@@ -39,6 +40,9 @@
 >    oifname {enp4s0,ppp0} masquerade
 > }
 >}
+>```
+>
+>
 
 also,enable ipv4 && ipv6 forward in sysctl.conf
 
