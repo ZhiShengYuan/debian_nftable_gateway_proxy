@@ -12,11 +12,14 @@ Debian:
 ```bash
 apt update -y&&apt install wget curl nftables -y
 ```
-If you need to use pppoe, install 'pppoeconf'
+If you need to use pppoe, install `pppoeconf`
 ```bash
 apt install pppoeconf -y
 ```
-
+Remove iptables by this command:
+```bash
+apt purge iptables* -y
+```
 #### 1. Install v2ray via official install script 
 
 ```bash
@@ -49,7 +52,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-#### 4. Enable ipv4 forward and reload systemd
+#### 4. Enable ipv4 forward in kernel and reload systemd
 
 ```bash
 echo 'net.ipv4.ip_forward = 1' >>/etc/sysctl.conf &&sysctl -p&&systemctl daemon-reload
