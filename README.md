@@ -1,6 +1,6 @@
 # Global transparent proxy by nftables and v2raya (A web control panel used for switching v2ray nodes)
 
-## This guide will help you to config global transparent proxy on Debian.
+## This guide will help you to config global transparent proxy on Debian 11.
 ## Other distributions are NOT tested and have NO guarantees.
 
 ## To begin with, you should ensure that you have got root access in order to do the following steps.
