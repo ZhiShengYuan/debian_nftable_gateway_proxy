@@ -52,7 +52,7 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-#### 4. Enable ipv4 forward and reload systemd
+#### 4. Enable ipv4 forward in kernel and reload systemd
 
 ```bash
 echo 'net.ipv4.ip_forward = 1' >>/etc/sysctl.conf &&sysctl -p&&systemctl daemon-reload
