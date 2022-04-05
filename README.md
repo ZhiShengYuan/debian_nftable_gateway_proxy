@@ -164,14 +164,14 @@ You may replace `/usr/local/etc/v2ray/config.json` with the config below:
 
 If you don't need DNS and DHCP services, ignore it.
 
-Official guide to install AdGuardHome: 'https://github.com/AdguardTeam/AdGuardHome'
+Official guide to install AdGuardHome: https://github.com/AdguardTeam/AdGuardHome
 
 Or you may run this script:
 ```bash
 curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
 ```
 
-An example of DNS config: 'https://github.com/fernvenue/adguardhome-upstream'
+An example of DNS config: https://github.com/fernvenue/adguardhome-upstream
 
 Enable DHCP server in `AdGuardHome` panel if needed.
 
