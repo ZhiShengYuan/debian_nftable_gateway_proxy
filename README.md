@@ -1,3 +1,5 @@
+## please run this in root
+
 ### 1.install v2ray via `bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)`
 
 ### 2.install nftables (if possible,remove iptables),and v2raya `https://github.com/v2rayA/v2rayA`
@@ -132,6 +134,7 @@ WantedBy=multi-user.target
 ### 10.start
 
 ```
+systemctl daemon-reload
 systemctl enable --now nftables 
 systemctl enable --now v2ray
 systemctl enable --now v2raya
