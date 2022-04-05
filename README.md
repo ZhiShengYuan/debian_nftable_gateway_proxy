@@ -122,7 +122,7 @@ Type=simple
 User=root
 LimitNPROC=500
 LimitNOFILE=1000000
-ExecStart=/usr/bin/v2raya --log-disable-timestamp --lite --v2ray-confdir /usr/local/etc/v2ray/v2raya
+ExecStart=/usr/bin/v2raya --log-disable-timestamp --lite
 Restart=on-failure
 
 [Install]
