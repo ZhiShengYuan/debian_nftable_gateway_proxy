@@ -1,27 +1,61 @@
-## Please ensure that you have got root privilege to do the following steps.
+# Global transparent proxy by nftables and v2raya (A web control panel used for switching v2ray nodes)
 
-### 1. Install v2ray using this script:
+## This guide will help you to config global transparent proxy on Debian.
+## Other distributions are NOT tested and have NO guarantees.
+
+## To begin with, you should ensure that you have got root access in order to do the following steps.
+
+### 1. Install required softwares
+
+#### 0. Install necessary packages
+Debian:
+```bash
+apt update -y&&apt install wget curl nftables -y
+```
+If you need to use pppoe, install 'pppoeconf'
+```bash
+apt install pppoeconf -y
+```
+
+#### 1. Install v2ray via official install script 
+
 ```bash
 bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 ```
 
-### 2. Install nftables (if possible,remove iptables)
-Debian/Ubuntu:
+#### 2. Install v2raya
+
+You may read this guide `https://v2raya.org/docs/prologue/installation/debian/` to install v2raya, but DO NOT install v2ray kernel. Only v2raya is required.
+
+#### 3. Edit the systemd unit of v2raya in order to prevent v2raya from breaking iptables and sysctl.
+
 ```bash
-apt install nftables -y
+# /etc/systemd/system/v2raya.service
+[Unit]
+Description=v2rayA Service
+Documentation=https://github.com/v2rayA/v2rayA/wiki
+After=network.target nss-lookup.target iptables.service ip6tables.service
+Wants=network.target
+
+[Service]
+Type=simple
+User=root
+LimitNPROC=500
+LimitNOFILE=1000000
+ExecStart=/usr/bin/v2raya --log-disable-timestamp --lite
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
 ```
-CentOS:
+
+#### 4. Enable ipv4 forward and reload systemd
+
 ```bash
-yum install nftables -y
+echo 'net.ipv4.ip_forward = 1' >>/etc/sysctl.conf &&sysctl -p&&systemctl daemon-reload
 ```
 
-### 3. Install v2raya from `https://github.com/v2rayA/v2rayA`
-
-### 4. Install `miniupnpd` `dnsmasq` `AdGuardHome` 
-
-### 5. Config `AdGuardHome` (Example: `https://github.com/fernvenue/adguardhome-upstream`)
-
-## An example of nftables config.
+#### 5. An example of nftables config.
 
 ```bash
 #!/usr/sbin/nft -f
@@ -34,7 +68,7 @@ table inet filter {
                iifname lo accept
                iifname enp3s0 accept
                icmp type echo-request accept
-               ip saddr 192.168.31.0/24 accept
+               ip saddr 192.168.2.1/24 accept
                tcp dport {ssh,https,http,1080} accept
                udp dport {53} accept
        }
@@ -55,30 +89,38 @@ chain prerouting {
   }
 chain postrouting {
     type nat hook postrouting priority srcnat;policy accept;
-    oifname {enp4s0,ppp0} ip ttl set 64
     oifname {enp4s0,ppp0} masquerade
  }
 }
 ```
 
-**the /etc/iprules/bypass.nft is chn list** 
+For this configuration, the `{enp4s0,ppp0}` object should be replaced by the anme of the WAN interface on your device, the `enp3s0` object should be replaced by the name of the LAN interface on your device, the `192.168.2.1/24` object should be replaced by your LAN IP CIDR, and the`{ssh,https,http,1080}` object is list of ports that you want to enable on your WAN interface.
 
-Please remember to replace `{enp4s0,ppp0}` to your own WAN interface name(ppp0 for example, which is the default interface name created by pppoeconf), `enp3s0` to your LAN interface, `192.168.31.0/24` to your LAN IP CIDR, and`{ssh,https,http,1080}`to the port you want to enable on WAN.
+Please notice that only often used ports will go through proxy for the configuration above. If you want all ports to go through proxy, just replace `tcp dport {80,443,22,3389,853} redirect to :1234` with `ip protocol tcp redirect to :1234`.
 
-### 6. Example of dnsmasq config
+The UDP traffic won't go through proxy (In my opinion, the best way to relay UDP is L2 VPN instead. There are lots of problems of v2ray UDP relay).
 
-```bash
-interface = enp3s0
-port = 9053
-dhcp-range = 192.168.31.2,192.168.31.254,30m
-dhcp-option = option:router,192.168.31.1
-dhcp-option = option:dns-server,192.168.31.1
-dhcp-leasefile = /var/log/dhcp.leases
+The file `/etc/iprules/bypass.nft` is the IP list you want to bypass (IP list of China).
+
+An example of the bypass list:
+
+```
+define bypassd = {
+10.0.0.0/8,
+172.16.0.0/12,
+192.168.0.0/16,
+}
 ```
 
-### 7.Example of v2ray config. (v2ray and v2raya are enabled simultaneously)
+In most cases, this list should contain CHN IP list and RFC1918 defined addresses.
 
-``` json
+If this device don't offer NAT services , delete `oifname {enp4s0,ppp0} masquerade`.
+
+#### 6. An example of v2ray configuration
+
+You may replace `/usr/local/etc/v2ray/config.json` with the config below:
+
+```json
 {
   "log": {
 
@@ -118,40 +160,28 @@ dhcp-leasefile = /var/log/dhcp.leases
 }
 ```
 
-### 8. Change the service object of v2raya to prevent it from breaking the sysctl configure and iptables.
+#### 7. Install and config `AdGuardHome`
 
-``` 
-# /etc/systemd/system/v2raya.service
-[Unit]
-Description=v2rayA Service
-Documentation=https://github.com/v2rayA/v2rayA/wiki
-After=network.target nss-lookup.target iptables.service ip6tables.service
-Wants=network.target
+If you don't need DNS and DHCP services, ignore it.
 
-[Service]
-Type=simple
-User=root
-LimitNPROC=500
-LimitNOFILE=1000000
-ExecStart=/usr/bin/v2raya --log-disable-timestamp --lite
-Restart=on-failure
+Official guide to install AdGuardHome: https://github.com/AdguardTeam/AdGuardHome
 
-[Install]
-WantedBy=multi-user.target
-```
-
-### 9. Enable ipv4 forward in your kernel
+Or you may run this script:
 ```bash
-net.ipv4.ip_forward = 1
+curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
 ```
 
-### 10.start
+An example of DNS config: https://github.com/fernvenue/adguardhome-upstream
 
-```
-systemctl daemon-reload
-systemctl enable --now nftables 
+Enable DHCP server in `AdGuardHome` panel if needed.
+
+#### 8. Start and enjoy
+
+```bash
 systemctl enable --now v2ray
+systemctl enable --now nftables
 systemctl enable --now v2raya
-sysctl -p
 ```
+
+Now you can access http://SERVERADDR:2017 to access v2raya panel to add v2ray nodes.
 
