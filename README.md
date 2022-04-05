@@ -107,7 +107,7 @@ write it as you like
 }
 ```
 
-### 8.replace v2ray systemd unit to prevent change the sysctl configure and iptables
+### 8.replace v2raya systemd unit to prevent change the sysctl configure and iptables
 
 ``` 
 # /etc/systemd/system/v2raya.service
