@@ -1,13 +1,19 @@
 ## Please ensure that you have got root privilege to do the following steps.
 
 ### 1. Install v2ray using this script:
-`bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)`
+```bash
+bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
+```
 
 ### 2. Install nftables (if possible,remove iptables)
 Debian/Ubuntu:
-'apt install nftables -y'
+```bash
+apt install nftables -y
+```
 CentOS:
-'yum install nftables -y'
+```bash
+yum install nftables -y
+```
 
 ### 3. Install v2raya from `https://github.com/v2rayA/v2rayA`
 
