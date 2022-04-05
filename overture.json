@@ -10,7 +10,7 @@
         "Timeout": 6,
         "EDNSClientSubnet": {
           "Policy": "enable",
-          "ExternalIP": "210.40.177.0/24",
+          "ExternalIP": "101.6.6.0/24",
           "NoCookie": true
         }
       }
