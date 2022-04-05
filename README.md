@@ -1,36 +1,35 @@
-# global transparent proxy by nftables with v2raya as wen panel
+# Global transparent proxy by nftables and v2raya (A web control panel used for switching v2ray nodes)
 
-this essay is the guide to config global transparent proxy in Debian
+## This guide will help you to config global transparent proxy on Debian.
+## Other distributions are NOT tested and do not have any guarantees.
 
-### the software we need
+## To begin with, you should ensure that you have got root access in order to do the following steps.
 
-`nftables` `v2ray` `v2raya` `AdGuardHome` ,if you need use pppoe to access internet,you may install `pppoeconf`,all command below should run as root
+### 1. Install required softwares
 
-install necessary package
-
+#### 0. Install necessary packages
+Debian:
 ```bash
-apt update -y&&apt install wget curl -y
+apt update -y&&apt install wget curl nftables -y
+```
+If you need to use pppoe, install 'pppoeconf'
+```bash
+apt install pppoeconf -y
 ```
 
-1.install nftables
-
-``` bash
-apt install nftables -y
-```
-
-2.install v2ray via official install script 
+#### 1. Install v2ray via official install script 
 
 ```bash
 bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
 ```
 
-3.install v2raya
+#### 2. Install v2raya
 
-please refer this link `https://v2raya.org/docs/prologue/installation/debian/`,but don't install v2ray kernel,only install v2raya
+You may read this guide `https://v2raya.org/docs/prologue/installation/debian/` to install v2raya, but DO NOT install v2ray kernel. Only v2raya is required.
 
-4.edit v2raya systemd unit to prevent v2raya change iptables and sysctl
+#### 3. Edit the systemd unit of v2raya in order to prevent v2raya from breaking iptables and sysctl.
 
-```
+```bash
 # /etc/systemd/system/v2raya.service
 [Unit]
 Description=v2rayA Service
@@ -50,15 +49,15 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-5.enable ipv4 forward and reload systemd
+#### 4. Enable ipv4 forward and reload systemd
 
 ```bash
 echo 'net.ipv4.ip_forward = 1' >>/etc/sysctl.conf &&sysctl -p&&systemctl daemon-reload
 ```
 
-6.config nftables
+#### 5. An example of nftables config.
 
-```
+```bash
 #!/usr/sbin/nft -f
 flush ruleset
 include "/etc/iprules/bypass.nft"
@@ -95,15 +94,15 @@ chain postrouting {
 }
 ```
 
-in this configure file,the `{enp4s0,ppp0}` should replace by the WAN interface name in your device,and `enp3s0` to the LAN interface, `192.168.2.1/24` to the network of your LAN,`{ssh,https,http,1080}` to the port you want to open to WAN
+For this configuration, the `{enp4s0,ppp0}` object should be replaced by the anme of the WAN interface on your device, the `enp3s0` object should be replaced by the name of the LAN interface on your device, the `192.168.2.1/24` object should be replaced by your LAN IP CIDR, and the`{ssh,https,http,1080}` object is list of ports that you want to enable on your WAN interface.
 
-please attention that this configure file only proxy often use port,if you want proxy all port,just replace `tcp dport {80,443,22,3389,853} redirect to :1234` to `ip protocol tcp redirect to :1234`
+Please notice that only often used ports will go through proxy for the configuration above. If you want all ports to go through proxy, just replace `tcp dport {80,443,22,3389,853} redirect to :1234` with `ip protocol tcp redirect to :1234`.
 
-the UDP traffic won't be proxy(in my option,the best way to relay UDP is L2 VPN instead this,there is lots of problems of v2ray UDP relay)
+The UDP traffic won't go through proxy (In my opinion, the best way to relay UDP is L2 VPN instead. There are lots of problems of v2ray UDP relay).
 
-the `/etc/iprules/bypass.nft` is the IP list you want to bypass
+The file `/etc/iprules/bypass.nft` is the IP list you want to bypass (IP list of China).
 
-the format of this file like this
+An example of the bypass list:
 
 ```
 define bypassd = {
@@ -113,13 +112,13 @@ define bypassd = {
 }
 ```
 
-in most scene,this list should be chn ip list and RFC1918 defined address
+In most cases, this list should contain CHN IP list and RFC1918 defined addresses.
 
-if this device needn't offer Nat server ,just delete `oifname {enp4s0,ppp0} masquerade`
+If this device don't offer NAT services , delete `oifname {enp4s0,ppp0} masquerade`.
 
-7.config v2ray
+#### 6. An example of v2ray configuration
 
-just replace `/usr/local/etc/v2ray/config.json` to below 
+You may replace `/usr/local/etc/v2ray/config.json` with the config below:
 
 ```json
 {
@@ -161,29 +160,28 @@ just replace `/usr/local/etc/v2ray/config.json` to below
 }
 ```
 
-8.install and config `AdGuardHome`
+#### 7. Install and config `AdGuardHome`
 
-If you needn't DNS server and DHCP server,please ignore it
+If you don't need DNS and DHCP services, ignore it.
 
-please refer this to install https://github.com/AdguardTeam/AdGuardHome
+Official guide to install AdGuardHome: 'https://github.com/AdguardTeam/AdGuardHome'
 
-or just run this script `curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v`
-
-please refer this repo to config
-
-https://github.com/fernvenue/adguardhome-upstream
-
-and enable DHCP server in `AdGuardHome` panel
-
-you can refer this 
-
-9.start and enjoy
-
+Or you may run this script:
+```bash
+curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
 ```
+
+An example of DNS config: 'https://github.com/fernvenue/adguardhome-upstream'
+
+Enable DHCP server in `AdGuardHome` panel if needed.
+
+#### 8. Start and enjoy
+
+```bash
 systemctl enable --now v2ray
 systemctl enable --now nftables
 systemctl enable --now v2raya
 ```
 
-and now you can access http://SERVERADDR:2017 to access v2raya panel to add node
+Now you can access http://SERVERADDR:2017 to access v2raya panel to add v2ray nodes.
 
