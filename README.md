@@ -1,14 +1,27 @@
-## please run this in root
+## Please ensure that you have got root privilege to do the following steps.
 
-### 1.install v2ray via `bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)`
+### 1. Install v2ray using this script:
+```bash
+bash <(curl -L https://raw.githubusercontent.com/v2fly/fhs-install-v2ray/master/install-release.sh)
+```
 
-### 2.install nftables (if possible,remove iptables),and v2raya `https://github.com/v2rayA/v2rayA`
+### 2. Install nftables (if possible,remove iptables)
+Debian/Ubuntu:
+```bash
+apt install nftables -y
+```
+CentOS:
+```bash
+yum install nftables -y
+```
 
-### 3.install `miniupnpd` `dnsmasq` `AdGuardHome` 
+### 3. Install v2raya from `https://github.com/v2rayA/v2rayA`
 
-### 4.config `AdGuardHome` via `https://github.com/fernvenue/adguardhome-upstream`
+### 4. Install `miniupnpd` `dnsmasq` `AdGuardHome` 
 
-### 5.config nftables like this
+### 5. Config `AdGuardHome` (Example: `https://github.com/fernvenue/adguardhome-upstream`)
+
+## An example of nftables config.
 
 ```bash
 #!/usr/sbin/nft -f
@@ -50,9 +63,9 @@ chain postrouting {
 
 **the /etc/iprules/bypass.nft is chn list** 
 
-also remember replace `{enp4s0,ppp0}` to your wan interface name(ppp0 often be the pppoe interface name),and `enp3s0` to LAN interface, `192.168.31.0/24` to your lan ip cidr,`{ssh,https,http,1080}`to the port you want open to wan 
+Please remember to replace `{enp4s0,ppp0}` to your own WAN interface name(ppp0 for example, which is the default interface name created by pppoeconf), `enp3s0` to your LAN interface, `192.168.31.0/24` to your LAN IP CIDR, and`{ssh,https,http,1080}`to the port you want to enable on WAN.
 
-### 6.config dnsmasq
+### 6. Example of dnsmasq config
 
 ```bash
 interface = enp3s0
@@ -63,9 +76,7 @@ dhcp-option = option:dns-server,192.168.31.1
 dhcp-leasefile = /var/log/dhcp.leases
 ```
 
-write it as you like
-
-### 7.config v2ray(yes,you need run v2ray and v2raya in the same time)
+### 7.Example of v2ray config. (v2ray and v2raya are enabled simultaneously)
 
 ``` json
 {
@@ -107,7 +118,7 @@ write it as you like
 }
 ```
 
-### 8.replace v2raya systemd unit to prevent change the sysctl configure and iptables
+### 8. Change the service object of v2raya to prevent it from breaking the sysctl configure and iptables.
 
 ``` 
 # /etc/systemd/system/v2raya.service
@@ -129,7 +140,10 @@ Restart=on-failure
 WantedBy=multi-user.target
 ```
 
-### 9. enable ipv4 forward 
+### 9. Enable ipv4 forward in your kernel
+```bash
+net.ipv4.ip_forward = 1
+```
 
 ### 10.start
 
