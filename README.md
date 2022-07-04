@@ -204,7 +204,7 @@ Or you may run this script:
 curl -s -S -L https://raw.githubusercontent.com/AdguardTeam/AdGuardHome/master/scripts/install.sh | sh -s -- -v
 ```
 
-An example of DNS config: https://github.com/fernvenue/adguardhome-upstream
+An example of DNS upstream config guide: https://github.com/fernvenue/adguardhome-upstream
 
 Enable DHCP server in `AdGuardHome` panel if needed.
 
